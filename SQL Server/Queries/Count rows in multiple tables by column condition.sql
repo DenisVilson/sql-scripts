@@ -9,7 +9,7 @@ GitHub: https://github.com/DenisVilson/sql-scripts
 -- The schema name to search for tables
 DECLARE @schema_name VARCHAR(128) = 'dbo';
 
--- The column filter condition to filter tables by the presence of a specific column
+-- The column filter condition to filter tables
 DECLARE @column_filter_condition VARCHAR(256) = '1 = 1';
 
 -- The row filter condition to filter rows within each table based on a specific condition
