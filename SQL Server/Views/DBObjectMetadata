@@ -1,0 +1,59 @@
+/*
+Author: Denis Vilson
+Version: 1.0
+Date: 2023-05-17
+GitHub: https://github.com/DenisVilson/sql-scripts
+
+Description: 
+This view provides a list of user tables, views, procedures, and functions 
+along with their schema, creation, and modification dates. It provides a useful overview 
+of the objects in the database, including their last modification date which can be 
+useful for tracking changes.
+*/
+
+CREATE VIEW DBObjectMetadata AS
+
+SELECT 
+    s.name AS [SchemaName],
+    t.[name] AS [ObjectName],
+    'UserTable' AS [ObjectType],
+    t.[create_date] AS [CreatedDate],
+    t.[modify_date] AS [ModifiedDate]
+FROM sys.tables t
+	INNER JOIN sys.dm_db_partition_stats ps ON t.object_id = ps.object_id
+	INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+WHERE t.type_desc = 'USER_TABLE' AND ps.index_id IN (0, 1) -- Include clustered index (1) or heap (0)
+
+UNION
+
+SELECT 
+    s.name AS [SchemaName],
+    v.[name] AS [ObjectName],
+    'View' AS [ObjectType],
+    v.[create_date] AS [CreatedDate],
+    v.[modify_date] AS [ModifiedDate]
+FROM sys.views v
+	INNER JOIN sys.schemas s ON v.schema_id = s.schema_id
+
+UNION
+
+SELECT 
+    s.name AS [SchemaName],
+    p.[name] AS [ObjectName],
+    'Procedure' AS [ObjectType],
+    p.[create_date] AS [CreatedDate],
+    p.[modify_date] AS [ModifiedDate]
+FROM sys.procedures p
+	INNER JOIN sys.schemas s ON p.schema_id = s.schema_id
+
+UNION
+
+SELECT 
+    s.name AS [SchemaName],
+    f.[name] AS [ObjectName],
+    'Function' AS [ObjectType],
+    f.[create_date] AS [CreatedDate],
+    f.[modify_date] AS [ModifiedDate]
+FROM sys.objects f
+	INNER JOIN sys.schemas s ON f.schema_id = s.schema_id
+WHERE f.type_desc LIKE '%FUNCTION%';
